@@ -38,12 +38,16 @@ namespace ctranslate2 {
     DisableTokens(StorageView& logits,
                   const float disable_value = std::numeric_limits<float>::lowest());
 
-    void add(dim_t batch_id, dim_t token_id) {
+    void add(dim_t batch_id, dim_t token_id, bool boost) {
       const auto flat_index = batch_id * _vocabulary_size + token_id;
 
       if (_logits_data) {
         // On CPU we directly assign the value.
-        _logits_data[flat_index] = _disable_value;
+        if (!boost)
+          _logits_data[flat_index] = _disable_value;
+        else 
+          _logits_data[flat_index] *= 10;
+
 
       } else {
         // On GPU we prepare a list of unique index to disable.
@@ -54,9 +58,9 @@ namespace ctranslate2 {
     }
 
     // Disable a token for all batches.
-    void add(dim_t token_id) {
+    void add(dim_t token_id, bool boost=false) {
       for (dim_t batch_id = 0; batch_id < _batch_size; ++batch_id)
-        add(batch_id, token_id);
+        add(batch_id, token_id, boost);
     }
 
     void apply();
@@ -173,6 +177,20 @@ namespace ctranslate2 {
                const StorageView& sequences,
                const std::vector<dim_t>& batch_offset,
                const std::vector<std::vector<size_t>>* prefix) override;
+
+  private:
+    const std::vector<size_t> _ids;
+  };
+
+  class BoostTokens : public LogitsProcessor {
+  public:
+    BoostTokens(std::vector<size_t> ids);
+    void apply(dim_t step,
+               StorageView& logits,
+               DisableTokens& enable_tokens,
+               const StorageView& sequences,
+               const std::vector<dim_t>& batch_offset,
+               const std::vector<std::vector<size_t>>* prefix);
 
   private:
     const std::vector<size_t> _ids;

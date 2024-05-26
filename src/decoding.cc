@@ -1047,6 +1047,9 @@ namespace ctranslate2 {
     if (!options.disable_ids.empty())
       processors.emplace_back(std::make_shared<SuppressTokens>(options.disable_ids));
 
+    if (!options.boost_ids.empty())
+      processors.emplace_back(std::make_shared<BoostTokens>(options.boost_ids));
+
     if (!options.disable_ids_begin.empty())
       processors.emplace_back(std::make_shared<SuppressTokensBegin>(options.disable_ids_begin));
 
