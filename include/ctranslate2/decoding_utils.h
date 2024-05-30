@@ -38,7 +38,7 @@ namespace ctranslate2 {
     DisableTokens(StorageView& logits,
                   const float disable_value = std::numeric_limits<float>::lowest());
 
-    void add(dim_t batch_id, dim_t token_id, bool boost) {
+    void add(dim_t batch_id, dim_t token_id, bool boost, float bias_term) {
       const auto flat_index = batch_id * _vocabulary_size + token_id;
 
       if (_logits_data) {
@@ -46,7 +46,7 @@ namespace ctranslate2 {
         if (!boost)
           _logits_data[flat_index] = _disable_value;
         else 
-          _logits_data[flat_index] *= 10;
+          _logits_data[flat_index] *= bias_term;
 
 
       } else {
@@ -58,9 +58,9 @@ namespace ctranslate2 {
     }
 
     // Disable a token for all batches.
-    void add(dim_t token_id, bool boost=false) {
+    void add(dim_t token_id, bool boost=false, float bias_term=1.0) {
       for (dim_t batch_id = 0; batch_id < _batch_size; ++batch_id)
-        add(batch_id, token_id, boost);
+        add(batch_id, token_id, boost, bias_term);
     }
 
     void apply();
@@ -184,7 +184,7 @@ namespace ctranslate2 {
 
   class BoostTokens : public LogitsProcessor {
   public:
-    BoostTokens(std::vector<size_t> ids);
+    BoostTokens(std::vector<std::pair<int, float>> ids);
     void apply(dim_t step,
                StorageView& logits,
                DisableTokens& enable_tokens,
@@ -193,7 +193,7 @@ namespace ctranslate2 {
                const std::vector<std::vector<size_t>>* prefix);
 
   private:
-    const std::vector<size_t> _ids;
+    const std::vector<std::pair<int, float>> _ids;
   };
 
 }

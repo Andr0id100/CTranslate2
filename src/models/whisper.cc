@@ -313,6 +313,10 @@ namespace ctranslate2 {
         }
       }
 
+      for (const auto& id_and_value: options.boost_tokens) {
+        decoding_options.boost_ids.push_back(id_and_value);
+      }      
+
       if (options.suppress_blank) {
         for (const auto& id : _model->config["suppress_ids_begin"])
           decoding_options.disable_ids_begin.push_back(id);

@@ -168,7 +168,7 @@ namespace ctranslate2 {
       disable_tokens.add(token_id);
   }
 
-  BoostTokens::BoostTokens(std::vector<size_t> ids)
+  BoostTokens::BoostTokens(std::vector<std::pair<int, float>> ids)
     : _ids(std::move(ids))
   {
   }
@@ -179,8 +179,9 @@ namespace ctranslate2 {
                           const StorageView&,
                           const std::vector<dim_t>&,
                           const std::vector<std::vector<size_t>>*) {
-    for (const auto token_id : _ids)
-      enable_tokens.add(token_id, true);
+
+    for (const auto& token_id : _ids)
+      enable_tokens.add(token_id.first, true, token_id.second);
   }
 
 

@@ -44,6 +44,7 @@ namespace ctranslate2 {
                size_t max_initial_timestamp_index,
                bool suppress_blank,
                const std::optional<std::vector<int>>& suppress_tokens,
+               const std::optional<std::vector<std::pair<int, float>>>& boost_tokens,
                size_t sampling_topk,
                float sampling_temperature) {
         std::vector<std::future<models::WhisperGenerationResult>> futures;
@@ -67,6 +68,11 @@ namespace ctranslate2 {
           options.suppress_tokens = suppress_tokens.value();
         else
           options.suppress_tokens.clear();
+
+        if (boost_tokens)
+          options.boost_tokens = boost_tokens.value();
+        else
+          options.boost_tokens.clear();
         std::shared_lock lock(_mutex);
         assert_model_is_ready();
 
@@ -251,6 +257,7 @@ namespace ctranslate2 {
              py::arg("max_initial_timestamp_index")=50,
              py::arg("suppress_blank")=true,
              py::arg("suppress_tokens")=std::vector<int>{-1},
+             py::arg("boost_tokens")=std::vector<std::pair<int, float>>(),
              py::arg("sampling_topk")=1,
              py::arg("sampling_temperature")=1,
              py::call_guard<py::gil_scoped_release>(),
@@ -282,6 +289,7 @@ namespace ctranslate2 {
                    suppress_blank: Suppress blank outputs at the beginning of the sampling.
                    suppress_tokens: List of token IDs to suppress. -1 will suppress a default set
                      of symbols as defined in the model ``config.json`` file.
+                  //  boost_tokens: List of token ids and corresponding bias values
                    sampling_topk: Randomly sample predictions from the top K candidates.
                    sampling_temperature: Sampling temperature to generate more random samples.
 

@@ -153,7 +153,7 @@ namespace ctranslate2 {
     bool return_prefix = true;
     float min_alternative_expansion_prob = 0;
     std::vector<size_t> disable_ids;
-    std::vector<size_t> boost_ids;
+    std::vector<std::pair<int, float>> boost_ids;
     std::vector<size_t> disable_ids_begin;
     std::vector<std::vector<size_t>> disable_sequences;
     std::vector<std::shared_ptr<LogitsProcessor>> logits_processors;
